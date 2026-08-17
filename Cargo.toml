@@ -1,0 +1,8 @@
+[package]
+name = "rgrep"
+version = "0.1.0"
+edition = "2024"
+author = "boise.dev"
+topic = "grep - Global Regular Expression Print"
+
+[dependencies]
