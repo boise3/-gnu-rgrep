@@ -1,1 +1,3 @@
+~/cargo run -- UWO grep.txt -i
+
 uwu UWO o
