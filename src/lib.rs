@@ -1,6 +1,10 @@
+
+#[warn(unused_imports)]
 use std::{error::Error, fs};
+use std::process;
 
 pub struct SearchEngine;
+
 impl SearchEngine{
    
 pub fn search(query: String, content: String) -> Vec<String>{
@@ -45,7 +49,13 @@ pub fn search_case_insensitive(query: String, content: String) -> Vec<String>{
 
 
 pub fn run (config: Config) -> Result<(), Box<dyn Error>>{
-    let contents = fs::read_to_string(config.file_path)?;
+    let contents = fs::read_to_string(&config.file_path)?;
+    let _content = fs::read(&config.file_path)?; //binary format for future
+
+    // if config.file_path.ends_with(".exe"){
+    //     eprintln!("Binary file plik matches");
+    //     process::exit(1);
+    // }
 
     let results = if config.ignore_case {
         SearchEngine::search_case_insensitive(config.query, contents)
