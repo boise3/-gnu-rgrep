@@ -1,4 +1,5 @@
 
+use std::process;
 #[warn(unused_imports)]
 use std::{error::Error, fs};
 
@@ -30,6 +31,18 @@ impl SearchEngine {
         result
     }
 
+    pub fn search_invert_match_v(query: String, content: String) -> Vec<String>{
+        let mut result: Vec<String> = Vec::new();
+
+            for line in content.lines(){
+                if !(line.contains(&query)){
+                    result.push(line.to_string());
+                }
+            }
+
+        result
+    }
+
     pub fn search_case_insensitive(query: String, content: String) -> Vec<String>{
 
         let mut result: Vec<String> = Vec::new();
@@ -41,6 +54,39 @@ impl SearchEngine {
                 result.push(line.to_string());
             }
         }
+        result
+    } 
+    
+    pub fn search_line_number_n(query: String, content: String) -> Vec<String>{
+        
+        let mut result: Vec<String> = Vec::new();
+        let mut number_of_lines: u32 = 0;
+        
+        for line in content.lines(){
+            number_of_lines += 1;
+
+            if line.contains(&query){
+                result.push(format!("{}:{}", number_of_lines, line.to_string()));
+            }                
+            
+        }
+
+        result
+    }
+
+    pub fn search_quiet_silent_q(query: String, content: String) -> Vec<String> {
+        let mut result: Vec<String> = Vec::new();
+
+        for line in content.lines(){
+            if line.contains(&query){
+                process::exit(0);
+            }else if !(line.contains(&query)){
+                process::exit(1);
+            }else{
+                process::exit(2)
+            }
+        }
+        
         result
     }
 
@@ -78,6 +124,12 @@ pub fn run (config: Config) -> Result<(), Box<dyn Error>>{
         SearchEngine::search_case_insensitive(config.query, contents)
     }else if config.only_matching_o {
         SearchEngine::search_word(config.query, contents)
+    }else if config.line_number_n {
+        SearchEngine::search_line_number_n(config.query, contents)
+    }else if config.quiet_silent_q {
+        SearchEngine::search_quiet_silent_q(config.query, contents) 
+    }else if config.invert_match_v{
+        SearchEngine::search_invert_match_v(config.query, contents)
     }else if config.count_c {
         SearchEngine::search_count_o(config.query, contents)
     }else {
@@ -97,6 +149,9 @@ pub struct Config{
     pub ignore_case_i: bool,
     pub only_matching_o: bool,
     pub count_c: bool,
+    pub invert_match_v: bool,
+    pub line_number_n: bool,
+    pub quiet_silent_q: bool,
 }
 
 
@@ -112,11 +167,23 @@ impl Config{
         let mut ignore_case_i = false;
         let mut only_matching_o = false; 
         let mut count_c: bool = false;
+        let mut invert_match_v:bool = false;
+        let mut line_number_n:bool = false;
+        let mut quiet_silent_q:bool = false;
         
         if args.len() == 4{
             match args[3].as_str(){
                 "-i" | "--ignore-case" => {
                     ignore_case_i = true;
+                }
+                "-v" | "--invert-match" => {
+                    invert_match_v = true;
+                }
+                "-q" | "--silent" | "--quiet" => {
+                    quiet_silent_q = true;
+                }
+                "-n" | "--line-number" => {
+                    line_number_n = true;
                 }
                 "-c" | "--count" => {
                     count_c = true;
@@ -136,7 +203,7 @@ impl Config{
             return Err("too many arguments".to_string())
         }
 
-        Ok(Config{query, file_path, ignore_case_i, only_matching_o, count_c})
+        Ok(Config{query, file_path, ignore_case_i, only_matching_o, count_c, invert_match_v, line_number_n, quiet_silent_q})
     }
 }
 
